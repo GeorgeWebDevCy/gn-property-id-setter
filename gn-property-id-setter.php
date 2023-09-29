@@ -5,13 +5,13 @@
  * @package       GNPROPERTY
  * @author        George Nicolaou
  * @license       gplv2
- * @version       1.0.3
+ * @version       1.0.4
  *
  * @wordpress-plugin
  * Plugin Name:   GN Property ID Setter
  * Plugin URI:    https://www.georgenicolaou.me/plugins/gn-property-id-setter
  * Description:   Assigns auto-incremented values to properties and enforces validation.
- * Version:       1.0.3
+ * Version:       1.0.4
  * Author:        George Nicolaou
  * Author URI:    https://www.georgenicolaou.me/
  * Text Domain:   gn-property-id-setter
@@ -30,7 +30,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 define( 'GNPROPERTY_NAME', 'GN Property ID Setter' );
 
 // Plugin version
-define( 'GNPROPERTY_VERSION', '1.0.3' );
+define( 'GNPROPERTY_VERSION', '1.0.4' );
 
 // Plugin Root File
 define( 'GNPROPERTY_PLUGIN_FILE', __FILE__ );
@@ -72,26 +72,24 @@ function assign_auto_increment_to_properties() {
     // Initialize a counter.
     $counter = 1;
 
+    // Array to store existing IDs for uniqueness check.
+    $existing_ids = array();
+
     // Loop through each property and assign an auto-incremented value.
     foreach ($properties as $property) {
-        // Format the counter with leading zeros to match the pattern.
-        $formatted_counter = sprintf('%05d', $counter);
-
-        // Construct the auto-incremented value with the desired pattern.
-        $auto_increment_value = '10-' . $formatted_counter;
-
-        // Check if the auto-incremented value already exists in the custom field.
+        // Get the current ID value.
         $existing_value = get_field('internal_property_id', $property->ID);
 
-        // If it exists, increment the counter until a unique value is found.
-        while ($existing_value && $existing_value === $auto_increment_value) {
+        // Ensure the existing ID is unique.
+        while ($existing_value && in_array($existing_value, $existing_ids)) {
             $counter++;
+            // Format the counter with leading zeros to match the pattern.
             $formatted_counter = sprintf('%05d', $counter);
-            $auto_increment_value = '10-' . $formatted_counter;
+            $existing_value = '10-' . $formatted_counter;
         }
 
         // Update the custom field with the unique auto-incremented value.
-        update_field('internal_property_id', $auto_increment_value, $property->ID);
+        update_field('internal_property_id', $existing_value, $property->ID);
 
         // Make the ACF field read-only to prevent user edits.
         acf_update_field(array(
@@ -99,8 +97,8 @@ function assign_auto_increment_to_properties() {
             'read_only' => true,
         ), $property->ID);
 
-        // Increment the counter.
-        $counter++;
+        // Add the assigned ID to the existing IDs array.
+        $existing_ids[] = $existing_value;
     }
 }
 
