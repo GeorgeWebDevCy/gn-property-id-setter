@@ -5,13 +5,13 @@
  * @package       GNPROPERTY
  * @author        George Nicolaou
  * @license       gplv2
- * @version       1.0.2
+ * @version       1.0.3
  *
  * @wordpress-plugin
  * Plugin Name:   GN Property ID Setter
  * Plugin URI:    https://www.georgenicolaou.me/plugins/gn-property-id-setter
  * Description:   Assigns auto-incremented values to properties and enforces validation.
- * Version:       1.0.2
+ * Version:       1.0.3
  * Author:        George Nicolaou
  * Author URI:    https://www.georgenicolaou.me/
  * Text Domain:   gn-property-id-setter
@@ -25,23 +25,24 @@
 
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) exit;
+
 // Plugin name
-define( 'GNPROPERTY_NAME',			'GN Property ID Setter' );
+define( 'GNPROPERTY_NAME', 'GN Property ID Setter' );
 
 // Plugin version
-define( 'GNPROPERTY_VERSION',		'1.0.2' );
+define( 'GNPROPERTY_VERSION', '1.0.3' );
 
 // Plugin Root File
-define( 'GNPROPERTY_PLUGIN_FILE',	__FILE__ );
+define( 'GNPROPERTY_PLUGIN_FILE', __FILE__ );
 
 // Plugin base
-define( 'GNPROPERTY_PLUGIN_BASE',	plugin_basename( GNPROPERTY_PLUGIN_FILE ) );
+define( 'GNPROPERTY_PLUGIN_BASE', plugin_basename( GNPROPERTY_PLUGIN_FILE ) );
 
 // Plugin Folder Path
-define( 'GNPROPERTY_PLUGIN_DIR',	plugin_dir_path( GNPROPERTY_PLUGIN_FILE ) );
+define( 'GNPROPERTY_PLUGIN_DIR', plugin_dir_path( GNPROPERTY_PLUGIN_FILE ) );
 
 // Plugin Folder URL
-define( 'GNPROPERTY_PLUGIN_URL',	plugin_dir_url( GNPROPERTY_PLUGIN_FILE ) );
+define( 'GNPROPERTY_PLUGIN_URL', plugin_dir_url( GNPROPERTY_PLUGIN_FILE ) );
 
 /**
  * Load the main class for the core functionality
@@ -49,18 +50,16 @@ define( 'GNPROPERTY_PLUGIN_URL',	plugin_dir_url( GNPROPERTY_PLUGIN_FILE ) );
 require_once GNPROPERTY_PLUGIN_DIR . 'core/class-gn-property-id-setter.php';
 require 'plugin-update-checker/plugin-update-checker.php';
 use YahnisElsts\PluginUpdateChecker\v5\PucFactory;
+
 /**
  * The main function to load the only instance
- * of our master class.
  *
- * @author  George Nicolaou
- * @since   1.0.0
- * @return  object|Gn_Property_Id_Setter
+ * @since 1.0.0
+ * @return object|Gn_Property_Id_Setter
  */
 function GNPROPERTY() {
 	return Gn_Property_Id_Setter::instance();
 }
-
 
 function assign_auto_increment_to_properties() {
     // Query for all Property CPT posts.
@@ -105,32 +104,37 @@ function assign_auto_increment_to_properties() {
     }
 }
 
-function assign_auto_increment_to_properties_on_save($post_id) {
-    // Check if this is a "property" post type.
-    if (get_post_type($post_id) === 'property') {
-        assign_auto_increment_to_properties();
+// Schedule the task to run daily.
+function schedule_auto_increment_task() {
+    if ( ! wp_next_scheduled( 'assign_auto_increment_task' ) ) {
+        wp_schedule_event( time(), 'daily', 'assign_auto_increment_task' );
     }
 }
+add_action( 'wp', 'schedule_auto_increment_task' );
 
-add_action('save_post', 'assign_auto_increment_to_properties_on_save');
+// Define the function to process a batch of "property" posts.
+function process_property_posts_batch() {
+    assign_auto_increment_to_properties();
+}
+add_action( 'assign_auto_increment_task', 'process_property_posts_batch' );
 
-function custom_id_validation($valid, $value, $field, $input_name) {
+function custom_id_validation( $valid, $value, $field, $input_name ) {
     // Check if the input matches the desired pattern (10-xxxxx).
-    if (!preg_match('/^10-\d{5}$/', $value)) {
+    if ( ! preg_match( '/^10-\d{5}$/', $value ) ) {
         $valid = 'Please enter a valid ID in the format 10-00001.';
     }
     return $valid;
 }
 
-add_filter('acf/validate_value/key=field_6506dd6fb8fb2', 'custom_id_validation', 10, 4);
+add_filter( 'acf/validate_value/key=field_6506dd6fb8fb2', 'custom_id_validation', 10, 4 );
 
 GNPROPERTY();
 
 $myUpdateChecker = PucFactory::buildUpdateChecker(
-	'https://github.com/GeorgeWebDevCy/gn-property-id-setter',
-	__FILE__,
-	'gn-property-id-setter'
+    'https://github.com/GeorgeWebDevCy/gn-property-id-setter',
+    __FILE__,
+    'gn-property-id-setter'
 );
 
-//Set the branch that contains the stable release.
+// Set the branch that contains the stable release.
 $myUpdateChecker->setBranch('main');
