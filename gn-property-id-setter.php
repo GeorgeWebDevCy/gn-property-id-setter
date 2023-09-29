@@ -47,7 +47,8 @@ define( 'GNPROPERTY_PLUGIN_URL',	plugin_dir_url( GNPROPERTY_PLUGIN_FILE ) );
  * Load the main class for the core functionality
  */
 require_once GNPROPERTY_PLUGIN_DIR . 'core/class-gn-property-id-setter.php';
-
+require 'plugin-update-checker/plugin-update-checker.php';
+use YahnisElsts\PluginUpdateChecker\v5\PucFactory;
 /**
  * The main function to load the only instance
  * of our master class.
@@ -61,3 +62,12 @@ function GNPROPERTY() {
 }
 
 GNPROPERTY();
+
+$myUpdateChecker = PucFactory::buildUpdateChecker(
+	'https://github.com/GeorgeWebDevCy/gn-property-id-setter',
+	__FILE__,
+	'gn-property-id-setter'
+);
+
+//Set the branch that contains the stable release.
+$myUpdateChecker->setBranch('main');
