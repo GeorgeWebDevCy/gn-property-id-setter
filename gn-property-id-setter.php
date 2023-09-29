@@ -5,13 +5,13 @@
  * @package       GNPROPERTY
  * @author        George Nicolaou
  * @license       gplv2
- * @version       1.0.4
+ * @version       1.0.5
  *
  * @wordpress-plugin
  * Plugin Name:   GN Property ID Setter
  * Plugin URI:    https://www.georgenicolaou.me/plugins/gn-property-id-setter
  * Description:   Assigns auto-incremented values to properties and enforces validation.
- * Version:       1.0.4
+ * Version:       1.0.5
  * Author:        George Nicolaou
  * Author URI:    https://www.georgenicolaou.me/
  * Text Domain:   gn-property-id-setter
@@ -30,7 +30,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 define( 'GNPROPERTY_NAME', 'GN Property ID Setter' );
 
 // Plugin version
-define( 'GNPROPERTY_VERSION', '1.0.4' );
+define( 'GNPROPERTY_VERSION', '1.0.5' );
 
 // Plugin Root File
 define( 'GNPROPERTY_PLUGIN_FILE', __FILE__ );
@@ -69,9 +69,6 @@ function assign_auto_increment_to_properties() {
         'post_status' => 'publish',
     ));
 
-    // Initialize a counter.
-    $counter = 1;
-
     // Array to store existing IDs for uniqueness check.
     $existing_ids = array();
 
@@ -80,9 +77,13 @@ function assign_auto_increment_to_properties() {
         // Get the current ID value.
         $existing_value = get_field('internal_property_id', $property->ID);
 
-        // Ensure the existing ID is unique.
-        while ($existing_value && in_array($existing_value, $existing_ids)) {
-            $counter++;
+        // Ensure the existing ID is unique and matches the desired pattern (10-xxxxx).
+        while (empty($existing_value) || !preg_match('/^10-\d{5}$/', $existing_value) || in_array($existing_value, $existing_ids)) {
+            // Generate a new auto-incremented value.
+            $counter = max(array_map(function($id) {
+                return (int)substr($id, 3); // Extract the numeric part.
+            }, $existing_ids)) + 1;
+
             // Format the counter with leading zeros to match the pattern.
             $formatted_counter = sprintf('%05d', $counter);
             $existing_value = '10-' . $formatted_counter;
@@ -101,7 +102,6 @@ function assign_auto_increment_to_properties() {
         $existing_ids[] = $existing_value;
     }
 }
-
 // Schedule the task to run daily.
 function schedule_auto_increment_task() {
     if ( ! wp_next_scheduled( 'assign_auto_increment_task' ) ) {
