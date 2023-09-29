@@ -122,7 +122,7 @@ function custom_id_validation($valid, $value, $field, $input_name) {
     return $valid;
 }
 
-add_filter('acf/validate_value', 'custom_id_validation', 10, 4);
+add_filter('acf/validate_value', 'internal_property_id', 10, 4);
 GNPROPERTY();
 
 $myUpdateChecker = PucFactory::buildUpdateChecker(
