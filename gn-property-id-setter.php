@@ -5,13 +5,13 @@
  * @package       GNPROPERTY
  * @author        George Nicolaou
  * @license       gplv2
- * @version       1.0.1
+ * @version       1.0.2
  *
  * @wordpress-plugin
  * Plugin Name:   GN Property ID Setter
  * Plugin URI:    https://www.georgenicolaou.me/plugins/gn-property-id-setter
  * Description:   Assigns auto-incremented values to properties and enforces validation.
- * Version:       1.0.1
+ * Version:       1.0.2
  * Author:        George Nicolaou
  * Author URI:    https://www.georgenicolaou.me/
  * Text Domain:   gn-property-id-setter
@@ -29,7 +29,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 define( 'GNPROPERTY_NAME',			'GN Property ID Setter' );
 
 // Plugin version
-define( 'GNPROPERTY_VERSION',		'1.0.1' );
+define( 'GNPROPERTY_VERSION',		'1.0.2' );
 
 // Plugin Root File
 define( 'GNPROPERTY_PLUGIN_FILE',	__FILE__ );
@@ -122,7 +122,8 @@ function custom_id_validation($valid, $value, $field, $input_name) {
     return $valid;
 }
 
-add_filter('acf/validate_value', 'internal_property_id', 10, 4);
+add_filter('acf/validate_value/key=field_6506dd6fb8fb2', 'custom_id_validation', 10, 4);
+
 GNPROPERTY();
 
 $myUpdateChecker = PucFactory::buildUpdateChecker(
