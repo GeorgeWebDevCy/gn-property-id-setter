@@ -5,13 +5,13 @@
  * @package       GNPROPERTY
  * @author        George Nicolaou
  * @license       gplv2
- * @version       1.0.0
+ * @version       1.0.1
  *
  * @wordpress-plugin
  * Plugin Name:   GN Property ID Setter
  * Plugin URI:    https://www.georgenicolaou.me/plugins/gn-property-id-setter
  * Description:   Assigns auto-incremented values to properties and enforces validation.
- * Version:       1.0.0
+ * Version:       1.0.1
  * Author:        George Nicolaou
  * Author URI:    https://www.georgenicolaou.me/
  * Text Domain:   gn-property-id-setter
@@ -29,7 +29,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 define( 'GNPROPERTY_NAME',			'GN Property ID Setter' );
 
 // Plugin version
-define( 'GNPROPERTY_VERSION',		'1.0.0' );
+define( 'GNPROPERTY_VERSION',		'1.0.1' );
 
 // Plugin Root File
 define( 'GNPROPERTY_PLUGIN_FILE',	__FILE__ );
