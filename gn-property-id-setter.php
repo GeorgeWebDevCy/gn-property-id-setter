@@ -61,6 +61,68 @@ function GNPROPERTY() {
 	return Gn_Property_Id_Setter::instance();
 }
 
+
+unction assign_auto_increment_to_properties() {
+    // Query for all Property CPT posts.
+    $properties = get_posts(array(
+        'post_type' => 'property', // Replace 'property' with your CPT name.
+        'posts_per_page' => -1,
+        'post_status' => 'publish',
+    ));
+
+    // Initialize a counter.
+    $counter = 1;
+
+    // Loop through each property and assign an auto-incremented value.
+    foreach ($properties as $property) {
+        // Format the counter with leading zeros to match the pattern.
+        $formatted_counter = sprintf('%05d', $counter);
+
+        // Construct the auto-incremented value with the desired pattern.
+        $auto_increment_value = '10-' . $formatted_counter;
+
+        // Check if the auto-incremented value already exists in the custom field.
+        $existing_value = get_field('internal_property_id', $property->ID);
+
+        // If it exists, increment the counter until a unique value is found.
+        while ($existing_value && $existing_value === $auto_increment_value) {
+            $counter++;
+            $formatted_counter = sprintf('%05d', $counter);
+            $auto_increment_value = '10-' . $formatted_counter;
+        }
+
+        // Update the custom field with the unique auto-incremented value.
+        update_field('internal_property_id', $auto_increment_value, $property->ID);
+
+        // Make the ACF field read-only to prevent user edits.
+        acf_update_field(array(
+            'key' => 'field_6506dd6fb8fb2', // Replace with the actual ACF field key.
+            'read_only' => true,
+        ), $property->ID);
+
+        // Increment the counter.
+        $counter++;
+    }
+}
+
+function assign_auto_increment_to_properties_on_save($post_id) {
+    // Check if this is a "property" post type.
+    if (get_post_type($post_id) === 'property') {
+        assign_auto_increment_to_properties();
+    }
+}
+
+add_action('save_post', 'assign_auto_increment_to_properties_on_save');
+
+function custom_id_validation($valid, $value, $field, $input_name) {
+    // Check if the input matches the desired pattern (10-xxxxx).
+    if (!preg_match('/^10-\d{5}$/', $value)) {
+        $valid = 'Please enter a valid ID in the format 10-00001.';
+    }
+    return $valid;
+}
+
+add_filter('acf/validate_value', 'custom_id_validation', 10, 4);
 GNPROPERTY();
 
 $myUpdateChecker = PucFactory::buildUpdateChecker(
