@@ -2,12 +2,12 @@
 Author URI: https://www.georgenicolaou.me/
 Plugin URI: https://www.georgenicolaou.me/plugins/gn-property-id-setter
 Donate link: 
-Contributors: 
+Contributors: orionaselite
 Tags: 
 Requires at least: 
 Tested up to: 
 Requires PHP: 
-Stable tag: 1.0.7
+Stable tag: 1.0.8
 License: GPLv2
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
