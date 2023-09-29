@@ -62,7 +62,7 @@ function GNPROPERTY() {
 }
 
 
-unction assign_auto_increment_to_properties() {
+function assign_auto_increment_to_properties() {
     // Query for all Property CPT posts.
     $properties = get_posts(array(
         'post_type' => 'property', // Replace 'property' with your CPT name.
