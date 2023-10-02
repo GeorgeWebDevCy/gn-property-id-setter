@@ -5,13 +5,13 @@
  * @package       GNPROPERTY
  * @author        George Nicolaou
  * @license       gplv2
- * @version       1.0.8
+ * @version       1.0.9
  *
  * @wordpress-plugin
  * Plugin Name:   GN Property ID Setter
  * Plugin URI:    https://www.georgenicolaou.me/plugins/gn-property-id-setter
  * Description:   Assigns auto-incremented values to properties and enforces validation.
- * Version:       1.0.8
+ * Version:       1.0.9
  * Author:        George Nicolaou
  * Author URI:    https://www.georgenicolaou.me/
  * Text Domain:   gn-property-id-setter
@@ -30,7 +30,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 define( 'GNPROPERTY_NAME', 'GN Property ID Setter' );
 
 // Plugin version
-define( 'GNPROPERTY_VERSION', '1.0.8' );
+define( 'GNPROPERTY_VERSION', '1.0.9' );
 
 // Plugin Root File
 define( 'GNPROPERTY_PLUGIN_FILE', __FILE__ );
@@ -92,6 +92,16 @@ function assign_auto_increment_to_properties() {
         // Update the custom field with the unique auto-incremented value.
         update_field('internal_property_id', $existing_value, $property->ID);
 
+        // Check if the post title is already the same as the property ID.
+        $post_title = get_the_title($property->ID);
+        if ($post_title !== $existing_value) {
+            // Update the post title with the same value.
+            wp_update_post(array(
+                'ID' => $property->ID,
+                'post_title' => $existing_value,
+            ));
+        }
+
         // Make the ACF field read-only to prevent user edits.
         acf_update_field(array(
             'key' => 'field_6506dd6fb8fb2', // Replace with the actual ACF field key.
@@ -102,6 +112,7 @@ function assign_auto_increment_to_properties() {
         $existing_ids[] = $existing_value;
     }
 }
+
 // Schedule the task to run daily.
 function schedule_auto_increment_task() {
     if ( ! wp_next_scheduled( 'assign_auto_increment_task' ) ) {
