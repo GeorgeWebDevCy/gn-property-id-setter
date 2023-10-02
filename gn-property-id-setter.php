@@ -5,13 +5,13 @@
  * @package       GNPROPERTY
  * @author        George Nicolaou
  * @license       gplv2
- * @version       1.0.9
+ * @version       1.1
  *
  * @wordpress-plugin
  * Plugin Name:   GN Property ID Setter
  * Plugin URI:    https://www.georgenicolaou.me/plugins/gn-property-id-setter
  * Description:   Assigns auto-incremented values to properties and enforces validation.
- * Version:       1.0.9
+ * Version:       1.1
  * Author:        George Nicolaou
  * Author URI:    https://www.georgenicolaou.me/
  * Text Domain:   gn-property-id-setter
@@ -30,7 +30,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 define( 'GNPROPERTY_NAME', 'GN Property ID Setter' );
 
 // Plugin version
-define( 'GNPROPERTY_VERSION', '1.0.9' );
+define( 'GNPROPERTY_VERSION', '1.1' );
 
 // Plugin Root File
 define( 'GNPROPERTY_PLUGIN_FILE', __FILE__ );
@@ -102,6 +102,26 @@ function assign_auto_increment_to_properties() {
             ));
         }
 
+        // Check if the post slug is already the same as the property ID.
+        $post_slug = sanitize_title($property->post_name);
+        if ($post_slug !== $existing_value) {
+            // Update the post slug with the same value.
+            wp_update_post(array(
+                'ID' => $property->ID,
+                'post_name' => $existing_value,
+            ));
+        }
+
+        // Check if the featured image is not set.
+        if (!has_post_thumbnail($property->ID)) {
+            // Get the first image from the ACF gallery field.
+            $gallery_images = get_field('field_64f8a5fdc9fd7', $property->ID);
+            if (!empty($gallery_images)) {
+                // Set the first image as the featured image.
+                set_post_thumbnail($property->ID, $gallery_images[0]['ID']);
+            }
+        }
+
         // Make the ACF field read-only to prevent user edits.
         acf_update_field(array(
             'key' => 'field_6506dd6fb8fb2', // Replace with the actual ACF field key.
@@ -112,6 +132,7 @@ function assign_auto_increment_to_properties() {
         $existing_ids[] = $existing_value;
     }
 }
+
 
 // Schedule the task to run daily.
 function schedule_auto_increment_task() {
